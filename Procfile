@@ -1,0 +1,1 @@
+web: gunicorn ustuda_backend.wsgi --log-file - 

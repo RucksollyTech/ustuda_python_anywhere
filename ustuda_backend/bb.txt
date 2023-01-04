@@ -1,0 +1,8 @@
+# Put all important details here
+
+EMAIL_HOST="smtp.gmail.com"
+EMAIL_HOST_USER="unitizedcoin@gmail.com"
+EMAIL_HOST_PASSWORD="wpwpuxwledycedjb"
+
+SECRET_KEY = 'django-insecure-m@9fbi-at^u^5qm!e+t&enuzq69)%uy(#9=$dtb)t$ip_f4xbl'
+DEBUG = True
