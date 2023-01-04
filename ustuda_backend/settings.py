@@ -4,6 +4,7 @@ import os
 from decouple import config
 from dj_database_url import parse as dburl
 from datetime import timedelta
+import dj_database_url
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -78,9 +79,14 @@ default_dburl = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-# default_dburl = 'sqlite///' + os.path.join(BASE_DIR, 'db.sqlite3')
 
-DATABASES = {'default':default_dburl, }
+# default_dburl = 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
+
+ma_default = 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
+
+DATABASES = {'default': dj_database_url.config(default=ma_default)}
+
+# DATABASES = {'default':default_dburl, }
 
 
 # Password validation
