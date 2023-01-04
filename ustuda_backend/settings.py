@@ -12,8 +12,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY")
 DEBUG = config("DEBUG", default=False, cast=bool)
-ALLOWED_HOSTS = ["localhost","127.0.0.1","http://localhost:3000"]
-
+# ALLOWED_HOSTS = ["localhost","127.0.0.1","http://localhost:3000,ustuda-testing.herokuapp.com"]
+ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
