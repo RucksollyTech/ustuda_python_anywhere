@@ -12,7 +12,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.hashers import make_password
 from rest_framework import status
-from pypaystack import Transaction
+# from pypaystack import Transaction
 from django.utils.deprecation import MiddlewareMixin
 from rest_framework_simplejwt.tokens import RefreshToken
 from itertools import chain
@@ -191,7 +191,7 @@ def verify_payment(request,*args,**kwargs):
     if not user:
         return Response({'detail': 'There is no such user'},status=status.HTTP_400_BAD_REQUEST)
     data = request.data
-    transaction = Transaction(authorization_key=settings.PAY_STACK_SECRETE_KEY)
+    # transaction = Transaction(authorization_key=settings.PAY_STACK_SECRETE_KEY)
     
     if "reference" in data :
         response  = transaction.verify(data["reference"])
@@ -201,11 +201,12 @@ def verify_payment(request,*args,**kwargs):
                 Payment_Information.objects.create(
                     user =request.user,
                     action = data["action"],
-                    reference = response[3]["reference"],
-                    transaction_id = response[3]["id"],
-                    amount = int(response[3]["amount"]) / (100),
-                    item_name = x_course.title,
-                    item_title = x_course.name
+                    reference = "ajbhshdfasbjauy"
+                    # reference = response[3]["reference"],
+                    # transaction_id = response[3]["id"],
+                    # amount = int(response[3]["amount"]) / (100),
+                    # item_name = x_course.title,
+                    # item_title = x_course.name
                 )
                 Notification.objects.create(
                     owner =request.user,
@@ -225,11 +226,12 @@ def verify_payment(request,*args,**kwargs):
                 Payment_Information.objects.create(
                     user =request.user,
                     action = data["action"],
-                    reference = response[3]["reference"],
-                    transaction_id = response[3]["id"],
-                    amount = int(response[3]["amount"]) / (100),
-                    item_name = x_course.course_name,
-                    item_title = x_course.material_title
+                    reference = "ajbhshdfasbjauy"
+                    # reference = response[3]["reference"],
+                    # transaction_id = response[3]["id"],
+                    # amount = int(response[3]["amount"]) / (100),
+                    # item_name = x_course.course_name,
+                    # item_title = x_course.material_title
                 )
                 Notification.objects.create(
                     owner =request.user,
@@ -245,11 +247,12 @@ def verify_payment(request,*args,**kwargs):
                 Payment_Information.objects.create(
                     user =request.user,
                     action = data["action"],
-                    reference = response[3]["reference"],
-                    transaction_id = response[3]["id"],
-                    amount = int(response[3]["amount"]) / (100),
-                    item_name = x_course.course_name,
-                    item_title = x_course.topic
+                    reference = "ajbhshdfasbjauy"
+                    # reference = response[3]["reference"],
+                    # transaction_id = response[3]["id"],
+                    # amount = int(response[3]["amount"]) / (100),
+                    # item_name = x_course.course_name,
+                    # item_title = x_course.topic
                 )
                 Notification.objects.create(
                     owner =request.user,
@@ -265,11 +268,12 @@ def verify_payment(request,*args,**kwargs):
                 Payment_Information.objects.create(
                     user =request.user,
                     action = data["action"],
-                    reference = response[3]["reference"],
-                    transaction_id = response[3]["id"],
-                    amount = int(response[3]["amount"]) / (100),
-                    item_name = x_course.title,
-                    item_title = x_course.name
+                    reference = "ajbhshdfasbjauy"
+                    # reference = response[3]["reference"],
+                    # transaction_id = response[3]["id"],
+                    # amount = int(response[3]["amount"]) / (100),
+                    # item_name = x_course.title,
+                    # item_title = x_course.name
                 )
                 Notification.objects.create(
                     owner =request.user,
