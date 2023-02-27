@@ -12,8 +12,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY")
 DEBUG = config("DEBUG", default=False, cast=bool)
-# ALLOWED_HOSTS = ["localhost","127.0.0.1","http://localhost:3000,ustuda-testing.herokuapp.com"]
-ALLOWED_HOSTS = ["*"]
+# ALLOWED_HOSTS = ["localhost","127.0.0.1","http://localhost:3000","ustuda-testing.herokuapp.com"]
+ALLOWED_HOSTS = ["139.144.25.42","127.0.0.1","localhost","localhost:3000","ustuda-production1.vercel.app","https://ustuda-production1.vercel.app"]
 # Application definition
 
 INSTALLED_APPS = [
@@ -23,7 +23,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "ustuda",
+    # "ustuda",
+    'ustuda.apps.UstudaConfig',
     'corsheaders',
     'rest_framework',
     "django_extensions",
@@ -39,6 +40,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'ustuda.middleware.OneSessionPerUserMiddleware',
 ]
 
 ROOT_URLCONF = 'ustuda_backend.urls'
@@ -138,43 +140,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # csrf Token section
 
 
-CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_ALLOW_ALL = True
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
-#     "http://localhost:8000"
-# ]
-
-
-# CORS_ORIGINS_WHITELIST=("http://localhost:3000",)
-# CORS_ALLOW_ALL_ORIGINS = True
-
-# CORS_ALLOW_CREDENTIALS = True
-
-# CSRF_COOKIE_NAME = "csrftoken"
-
-# CORS_ALLOW_METHODS = [
-#     'DELETE',
-#     'GET',
-#     'OPTIONS',
-#     'PATCH',
-#     'POST',
-#     'PUT',
-# ]
-
-# CORS_ALLOW_HEADERS = [
-#     'accept',
-#     'accept-encoding',
-#     'authorization',
-#     'content-type',
-#     'dnt',
-#     'origin',
-#     'user-agent',
-#     'x-csrftoken',
-#     'x-requested-with',
-#     'Access-Control-Allow-Origin',
-# ]
-
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:8000",
+    "http://localhost",
+    "https://ustuda-production1.vercel.app"
+]
 
 
 DEFAULT_RENDERER_CLASSES = [
@@ -203,7 +176,7 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': False,
@@ -236,26 +209,26 @@ SIMPLE_JWT = {
 
 
 
-PAY_STACK_SECRETE_KEY = "sk_test_1db522890eaf013fcc1ba58cfc049554095a1443"
+PAY_STACK_SECRETE_KEY = config("PAY_STACK_SECRETE_KEY")
 
-CLIENT_ID = "869450540663-nmlfq1mlt1m54htaqmeedu6898djkn5n.apps.googleusercontent.com"
+CLIENT_ID = config("CLIENT_ID")
 
-CLIENT_SECRETE = "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"
+CLIENT_SECRETE = config("CLIENT_SECRETE")
 
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# # env('EMAIL_HOST')
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_HOST_USER = 'chibuzoranthonyokenwa@gmail.com'
-# EMAIL_HOST_PASSWORD = 'fnqjxigxrhwzkraz'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# env('EMAIL_HOST')
+EMAIL_HOST = config("EMAIL_HOST")
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
 
-EMAIL_HOST = 'smtp.mailtrap.io'
-EMAIL_HOST_USER = '66a01107bfe679'
-EMAIL_HOST_PASSWORD = '4887a0492f2f77'
-EMAIL_PORT = '2525'
+# EMAIL_HOST = 'smtp.mailtrap.io'
+# EMAIL_HOST_USER = '66a01107bfe679'
+# EMAIL_HOST_PASSWORD = '4887a0492f2f77'
+# EMAIL_PORT = '2525'
 
-FRONTEND_URL = "http://localhost:3000"
+FRONTEND_URL = config("FRONTEND_URL")
 
 
 

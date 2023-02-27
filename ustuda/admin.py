@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Comments,Comments_Holder, Announcements, Payment_Information, Courses,Profile, Skills, Tutorial,Schools,Materials,Classes,Notification
+from .models import Logged_In_User_Jwt_Rec, Comments,Comments_Holder, Announcements, Payment_Information, Courses,Profile, Skills, Tutorial,Schools,Materials,Classes,Notification
 
 
 # Register your models here.
@@ -16,3 +16,4 @@ admin.site.register(Announcements)
 admin.site.register(Payment_Information)
 admin.site.register(Comments)
 admin.site.register(Comments_Holder)
+admin.site.register(Logged_In_User_Jwt_Rec)

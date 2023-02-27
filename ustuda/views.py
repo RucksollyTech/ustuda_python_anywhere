@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, renderer_classes, permission_classes
-from .models import Comments,Announcements, Comments_Holder, Tokens, Payment_Information, Courses,Profile, Skills, Tutorial,Schools,Materials,Classes,Notification
+from .models import Logged_In_User_Jwt_Rec, Comments,Announcements, Comments_Holder, Tokens, Payment_Information, Courses,Profile, Skills, Tutorial,Schools,Materials,Classes,Notification
 from django.db.models import Q,F
 from .serializers import CommentSerializer, AnnouncementsSerializer, UserSerializer, GeneralSerializer, SkillsSerializer,TutorialSerializer,SchoolsSerializer,MaterialsSerializer,ClassesSerializer,NotificationSerializer,ProfileSerializer,CoursesSerializer,UserSerializerWithToken
 import json
@@ -12,9 +12,10 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.hashers import make_password
 from rest_framework import status
-# from pypaystack import Transaction
+from pypaystack import Transaction
 from django.utils.deprecation import MiddlewareMixin
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from itertools import chain
 from datetime import timedelta,datetime
 
@@ -30,7 +31,10 @@ import requests
 
 from rest_framework.views import APIView
 from django.core.mail import EmailMultiAlternatives,send_mail
+from decouple import config
+from django.utils import timezone
 
+JWT_authenticator = JWTAuthentication()
 
 @api_view(['GET'])
 def home(request,*args,**kwargs):
@@ -86,7 +90,7 @@ def home(request,*args,**kwargs):
         "all_courses": all_courses.data,
         "tutorials": tutorials.data
     }
-    
+    # print(request.refresh)
     return Response(context,status=200)
 
 
@@ -177,8 +181,12 @@ def userPaidTutorial(request,pk,*args,**kwargs):
     pk=int(pk)
     user = request.user
     obj = Tutorial.objects.filter(students__id=user.id,id=pk).first()
-    serializer = TutorialSerializer(obj)
-    if obj:
+    obj2 = Tutorial.objects.filter(id=pk).first()
+    if obj or obj2:
+        if obj2 and not obj2.price:
+            serializer = TutorialSerializer(obj2)
+            return Response(serializer.data,status=200)
+        serializer = TutorialSerializer(obj)
         return Response(serializer.data,status=200)
     else:
         return Response(None,status=200)
@@ -191,22 +199,22 @@ def verify_payment(request,*args,**kwargs):
     if not user:
         return Response({'detail': 'There is no such user'},status=status.HTTP_400_BAD_REQUEST)
     data = request.data
-    # transaction = Transaction(authorization_key=settings.PAY_STACK_SECRETE_KEY)
+    transaction = Transaction(authorization_key=config("PAY_STACK_SECRETE_KEY"))
     
     if "reference" in data :
         response  = transaction.verify(data["reference"])
         if data["action"] == "course":
             x_course = Courses.objects.get(pk=int(data["pk"]))
+            tutoriaL = Tutorial.objects.get(pk= x_course.tutorial.id)
             if response[3]["status"] == "success" and (int(response[3]["amount"]) / (100)) == x_course.price:
                 Payment_Information.objects.create(
                     user =request.user,
                     action = data["action"],
-                    reference = "ajbhshdfasbjauy"
-                    # reference = response[3]["reference"],
-                    # transaction_id = response[3]["id"],
-                    # amount = int(response[3]["amount"]) / (100),
-                    # item_name = x_course.title,
-                    # item_title = x_course.name
+                    reference = response[3]["reference"],
+                    transaction_id = response[3]["id"],
+                    amount = int(response[3]["amount"]) / (100),
+                    item_name = x_course.title,
+                    item_title = x_course.name
                 )
                 Notification.objects.create(
                     owner =request.user,
@@ -219,6 +227,8 @@ def verify_payment(request,*args,**kwargs):
                 if all_mat:
                     for i in all_mat:
                         i.students.add(request.user)
+                if tutoriaL:
+                    tutoriaL.students.add(request.user)
                 x_course.students.add(request.user)
         elif data["action"] == "material":
             x_course = Materials.objects.get(pk=int(data["pk"]))
@@ -226,12 +236,11 @@ def verify_payment(request,*args,**kwargs):
                 Payment_Information.objects.create(
                     user =request.user,
                     action = data["action"],
-                    reference = "ajbhshdfasbjauy"
-                    # reference = response[3]["reference"],
-                    # transaction_id = response[3]["id"],
-                    # amount = int(response[3]["amount"]) / (100),
-                    # item_name = x_course.course_name,
-                    # item_title = x_course.material_title
+                    reference = response[3]["reference"],
+                    transaction_id = response[3]["id"],
+                    amount = int(response[3]["amount"]) / (100),
+                    item_name = x_course.course_name,
+                    item_title = x_course.material_title
                 )
                 Notification.objects.create(
                     owner =request.user,
@@ -247,12 +256,11 @@ def verify_payment(request,*args,**kwargs):
                 Payment_Information.objects.create(
                     user =request.user,
                     action = data["action"],
-                    reference = "ajbhshdfasbjauy"
-                    # reference = response[3]["reference"],
-                    # transaction_id = response[3]["id"],
-                    # amount = int(response[3]["amount"]) / (100),
-                    # item_name = x_course.course_name,
-                    # item_title = x_course.topic
+                    reference = response[3]["reference"],
+                    transaction_id = response[3]["id"],
+                    amount = int(response[3]["amount"]) / (100),
+                    item_name = x_course.course_name,
+                    item_title = x_course.topic
                 )
                 Notification.objects.create(
                     owner =request.user,
@@ -268,12 +276,11 @@ def verify_payment(request,*args,**kwargs):
                 Payment_Information.objects.create(
                     user =request.user,
                     action = data["action"],
-                    reference = "ajbhshdfasbjauy"
-                    # reference = response[3]["reference"],
-                    # transaction_id = response[3]["id"],
-                    # amount = int(response[3]["amount"]) / (100),
-                    # item_name = x_course.title,
-                    # item_title = x_course.name
+                    reference = response[3]["reference"],
+                    transaction_id = response[3]["id"],
+                    amount = int(response[3]["amount"]) / (100),
+                    item_name = x_course.title,
+                    item_title = x_course.name
                 )
                 Notification.objects.create(
                     owner =request.user,
@@ -314,7 +321,8 @@ def course_detail(request,pk,*args,**kwargs):
         "paid" : paid,
         "top_courses" :CoursesSerializer(top_courses,many=True).data,
         "course" : CoursesSerializer(obj).data,
-        "classes" : ClassesSerializer(classes_on_course,many=True).data
+        "classes" : ClassesSerializer(classes_on_course,many=True).data,
+        "tutorial" : obj.tutorial.id if obj.tutorial else None
     } 
     obj.most_viewed = obj.most_viewed + 1
     obj.save()   
@@ -375,9 +383,13 @@ def material_detail(request,pk,*args,**kwargs):
 
     paid = None
     check_paid = Courses.objects.filter(materials =obj).first()
-    students =check_paid.students.count()
-    if not students:
-        students = 0
+    students = 0
+    
+    if check_paid:
+        try:
+            students =check_paid.students.count()
+        except:
+            students = 0
     try:
         if obj.students.get(id=user.id):
             paid = True
@@ -490,6 +502,7 @@ def my_courses_and_inventories(request,*args,**kwargs):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def ongoing_skill_detail(request,pk,*args,**kwargs):
+    user = request.user
     pk=int(pk)
     obj = Skills.objects.get(id=pk)
     
@@ -502,8 +515,10 @@ def ongoing_skill_detail(request,pk,*args,**kwargs):
     paid = None
     
     try:
+        print(user.id)
         if obj.students.get(id=user.id):
             paid = True
+            print(True)
     except:
         if not obj.price:
             paid = True
@@ -897,9 +912,10 @@ def skills(request,skill="",*args,**kwargs):
     level = request.query_params.get("level")
     price = request.query_params.get("price")
     course = request.query_params.get("course")
-    
+    owen = str(skill)
     if skill:
-        obj = Skills.objects.filter(name=skill).all()
+        obj = Skills.objects.filter(title=owen).all()
+        
         if not obj:
             message = {'detail': 'Skill does not exist'}
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
@@ -908,7 +924,6 @@ def skills(request,skill="",*args,**kwargs):
             
             if query:
                 obj = obj.filter(Q(title__icontains=query)| Q(name__icontains=query)| Q(price__icontains=query) | Q(levels__icontains=query) | Q(teacher_name__icontains=query)| Q(level__icontains=query))
-
             if topic:
                 if topic == "newest":
                     obj = obj.filter(date__lte = datetime.now() + relativedelta(month =+12) )
@@ -924,7 +939,6 @@ def skills(request,skill="",*args,**kwargs):
                         obj = obj.filter(price = None)
                     else:
                         obj = obj.filter(price__gt = 9000)
-            
             if course and course != "All":
                 if course == "manual skills":
                     obj = obj.filter(manual_skill = True)
@@ -1368,6 +1382,22 @@ def registerUser(request):
             email=data['email'],
             password=make_password(data['password'])
         )
+        ip = None
+        try:
+            ip = request.META.get('REMOTE_ADDR')
+        except:
+            try:
+                x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+                if x_forwarded_for:
+                    ip = x_forwarded_for.split(',')[-1].strip()
+            except:
+                ip= None
+            
+        Logged_In_User_Jwt_Rec.objects.create(
+            user = user,
+            ip_address= ip,
+            date= datetime.now() + timedelta(hours=12)
+        )
         # I wanted to add conversion rate to the admin
         # user_xchng =
         # serializer = UserSerializerWithToken(user,context={"amount":})
@@ -1378,12 +1408,77 @@ def registerUser(request):
         return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['GET','POST'])
+def logout(request):
+    data = request.data
+    print(data)
+    user = User.objects.filter(email = data["email"]).first()
+    delUser= Logged_In_User_Jwt_Rec.objects.filter(user=user).first()
+    print(delUser)
+    
+    if delUser:
+        delUser.delete()
+        print("Deleted")
+        
+    return Response({"success":"success"},status=201)
+
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
-
+        
+        # ip = None
+        # try:
+        #     ip = request.META.get('REMOTE_ADDR')
+        #     print(ip,"one")
+        # except:
+        #     try:
+        #         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        #         if x_forwarded_for:
+        #             ip = x_forwarded_for.split(',')[-1].strip()
+        #             print(ip,"two")
+        #     except:
+        #         ip= None
+    
         serializer = UserSerializerWithToken(self.user).data
+
+        check_multi_auth = Logged_In_User_Jwt_Rec.objects.filter(user=self.user).all()
+        if not check_multi_auth:
+            Logged_In_User_Jwt_Rec.objects.create(
+                user = self.user,
+                date= datetime.now() + timedelta(hours=12)
+            )
+        elif check_multi_auth and check_multi_auth.count() < 4:
+            Logged_In_User_Jwt_Rec.objects.create(
+                user = self.user,
+                date= datetime.now(tz=timezone.utc) + timedelta(hours=12)
+            )
+        elif check_multi_auth and check_multi_auth.count() > 2 and check_multi_auth.count() < 4:
+            gg = True
+            for i in check_multi_auth:
+                if i.date > timezone.now():
+                    pass
+                else:
+                    i.delete()
+                    Logged_In_User_Jwt_Rec.objects.create(
+                        user = self.user,
+                        date= datetime.now() + timedelta(hours=12)
+                    )
+                    gg = False
+            if gg == True:
+                for k, v in serializer.items():
+                    data[k] = v
+                data["error"] = "Please logout from previously used device"
+                return data
+        elif check_multi_auth and check_multi_auth.count() > 3:
+            for k, v in serializer.items():
+                    data[k] = v
+            data["error"] = "Please logout from previously used device"
+            # message = json.dumps({'detail': 'Please logout from previously used device'})
+            return data
+            
+            # Logout should contain email from frontend and we del
+            # this user
         for k, v in serializer.items():
             data[k] = v
 

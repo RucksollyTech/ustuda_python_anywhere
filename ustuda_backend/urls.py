@@ -3,15 +3,17 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from ustuda.views import announcement_update, tutors_date_actions, tutors_actions, reset_token ,reset_request, all_comments, comments,courses_all, school_courses_search, GoogleAuthApiView, verify_payment, continue_reg, get_profile, my_courses_and_inventories, material_detail, ongoing_skill_detail, skill_detail, notifications, ongoing_tutorial_detail,tutorial_detail,userPaidTutorial, testing,ongoing_course_detail, userPaid,home,registerUser,schools,courses,skills,materials,tutorials,classes,school_detail,course_detail,school_courses,MyTokenObtainPairView
+from ustuda.views import logout, announcement_update, tutors_date_actions, tutors_actions, reset_token ,reset_request, all_comments, comments,courses_all, school_courses_search, GoogleAuthApiView, verify_payment, continue_reg, get_profile, my_courses_and_inventories, material_detail, ongoing_skill_detail, skill_detail, notifications, ongoing_tutorial_detail,tutorial_detail,userPaidTutorial, testing,ongoing_course_detail, userPaid,home,registerUser,schools,courses,skills,materials,tutorials,classes,school_detail,course_detail,school_courses,MyTokenObtainPairView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from django.contrib.staticfiles.storage import staticfiles_storage
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home),
+    path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url('media/favicon/favicon.ico'))),
     path('api/home', home),
     path('api/testing', testing),
     path('api/schools', schools),
@@ -30,6 +32,7 @@ urlpatterns = [
     path('api/get_profile', get_profile),
     path('api/continue_reg', continue_reg),
     path('api/comments', comments),
+    path('api/logout', logout),
     path('api/announcement_update', announcement_update),
     path('api/reset_token', reset_token),
     path('api/reset_request', reset_request),
