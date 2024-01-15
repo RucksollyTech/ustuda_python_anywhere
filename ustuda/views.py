@@ -90,15 +90,8 @@ def home(request,*args,**kwargs):
         "all_courses": all_courses.data,
         "tutorials": tutorials.data
     }
-    # print(request.refresh)
     return Response(context,status=200)
 
-
-# @api_view(['GET'])
-# def schools(request,*args,**kwargs):
-#     obj = Schools.objects.all()
-#     serializer = SchoolsSerializer(obj,many=True)
-#     return Response(serializer.data,status=200)
 
 
 @api_view(['GET'])
