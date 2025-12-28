@@ -46,8 +46,8 @@ def home(request,*args,**kwargs):
 
     
     active_courses= None
-    if not obj:
-        return Response({},status=404)
+    # if not obj:
+        # return Response({},status=404)
     try:
         user = request.user.id
         profile = Profile.objects.filter(user__id = user).first()
@@ -688,7 +688,7 @@ def school_courses_search(request,pk,*args,**kwargs):
         sch_courses = Courses.objects.filter(schools=obj).all()
         if sch_courses:
             if query:
-                sch_courses = sch_courses.filter(Q(title__icontains=query)| Q(name__icontains=query)| Q(price__icontains=query) | Q(levels__icontains=query)| Q(schools__name__icontains=query) | Q(teacher_name__icontains=query)| Q(level__icontains=query))
+                sch_courses  = sch_courses.filter(Q(title__icontains=query)| Q(name__icontains=query)| Q(price__icontains=query) | Q(levels__icontains=query)| Q(schools__name__icontains=query) | Q(teacher_name__icontains=query)| Q(level__icontains=query))
             if school:
                 sch_courses = sch_courses.filter(schools__name = school)
             if topic:
